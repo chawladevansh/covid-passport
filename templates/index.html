@@ -1,14 +1,16 @@
-<html>
-  <head>
-    <title>Covid Passport</title>
-  </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Covid Passport</title>
   <body>
-  <body style="background-color:turquoise;"></body>
-    <center><h1>COVID PASSPORT</h1></center>
-    <center><img src="{{ url_for('video_feed') }}" width="400" border="3"></center>
-    <br>
-    <center><input type="submit" name="Capture Image" value="Capture"></center>
-    <br>
-    <center><input type="submit" name="New Entry" value="Add User"></center>
+    <body style="background-color:#55d3e6;"></body>
+    <!-- <center><img src="{{ url_for('video_feed') }}" width="400" border="3"></center> -->
+    <center>
+      <img src ="/static/logo.png" alt = "Logo" width = "400">
+      <br><br><br>
+      <a href=new_user ><button class=gray style="height:75px;width:300px">GENERATE PASSPORT</button>
+      <a href=get_user ><button class=gray style="height:75px;width:300px">GET PASSPORT</button>
+    </center>
   </body>
-</html>
+</head>
+<body>
