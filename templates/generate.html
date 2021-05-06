@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Covid Passport</title>
+  <body>
+    <body style="background-color:#55d3e6;"></body>
+    <center>
+        <img src ="/static/logo.png" alt = "Logo" width = "200">
+        <br><br>
+        <h1>GENERATE PASSPORT</h1>
+        <br><br><br>
+        <img src="{{ url_for('video_feed') }}" width="400" border="3">
+        <br><br><br>
+        <form method="POST" action="">
+          <div class="form-row">
+              <div class="form-group col-md-6">
+                  {{ form.csrf_token() }}
+                  <label for=""> {{ form.f_name.label }}</label>
+                  <br>
+                  {{ form.f_name }}
+                  <br>
+                  <br>
+                  <label for=""> {{ form.l_name.label }}</label>
+                  <br>
+                  {{ form.l_name }}
+                  <br><br>
+                  <label for=""> {{ form.email.label }}</label>
+                  <br>
+                  {{ form.email }}
+                  <br>
+                  <br>
+                  <label for=""> {{ form.dob.label }}</label>
+                  <br>
+                  {{ form.dob }}
+                  <br>
+                  <br>
+                  <label for=""> {{ form.vaccine.label }}</label>
+                  <br>
+                  {{ form.vaccine }}
+                  <br>
+                  <br>
+                  <label for=""> {{ form.dose1.label }}</label>
+                  <br>
+                  {{ form.dose1 }}
+                  <br>
+                  <br>
+                  <label for=""> {{ form.dose2.label }}</label>
+                  <br>
+                  {{ form.dose2 }}
+                  <br>
+                  <br>
+              </div>
+              <div class="form-group">
+                  {{ form.submit(class="btn btn-primary")}}
+              </div>
+          </div>
+      </form>
+    </center>
+  </body>
+</head>
+<body>
+
+  

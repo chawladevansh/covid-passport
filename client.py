@@ -1,24 +1,21 @@
-''' TODO 
-
- - Facial recognition
- - Flask video streaming
-
-'''
 import os
 import cv2
-import time
 import pickle
-import argparse
+import time
+import glob
 import face_recognition
-from imutils import paths
-from imutils.video import VideoStream
-from flask import Response, flash
 from flask import Flask
+from flask import Response, flash
 from flask import render_template
 from flask import request
-from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
+from flask import redirect
+from flask_wtf import FlaskForm
+from imutils import paths
+from wtforms import StringField, TextField, SubmitField
+from wtforms.validators import DataRequired, Length
 
 app = Flask(__name__)
+app.config['SECRET_KEY']='DevanshAndJayTeam16'
 camera = cv2.VideoCapture(0)
 
 dataset_path = '/home/devansh/covid-passport/Dataset'
@@ -29,9 +26,24 @@ def resize_image(image):
     resized = cv2.resize(image, dim)
     return resized
 
+class get_user_data(FlaskForm):
+    f_name = StringField(label=('First Name'))
+    l_name = StringField('Last Name')
+    email = StringField('Email')
+    dob = StringField('Birthday')
+    vaccine = StringField('Vaccine')
+    dose1 = StringField('Dose 1')
+    dose2 = StringField('Dose 2')
+    submit = SubmitField('Submit')
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
+
+@app.route('/video_feed', methods=['GET', 'POST'])
+def video_feed():
+    global camera
+    return Response(get_video(camera), mimetype='multipart/x-mixed-replace; boundary=frame')  
 
 def get_video(camera):
     while True:
@@ -44,61 +56,62 @@ def get_video(camera):
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
+@app.route('/generate', methods=['GET', 'POST'])
+def generate():
+    form = get_user_data()
 
-@app.route('/video_feed', methods=['GET', 'POST'])
-def video_feed():
-    global camera
-    return Response(get_video(camera), mimetype='multipart/x-mixed-replace; boundary=frame')
+    # TODO : get user pin
 
-@app.route('/process_images', methods=["GET","POST"])
-def process_images():
-    global camera
-    for i in range(15):
-        ret, frame = camera.read()
-        frame = resize_image(frame)
-        cv2.imwrite(os.path.join(dataset_path , "image" + str(i) + '.jpg'), frame)
-        time.sleep(0.5)
-    return ('')
+    if form.validate_on_submit():
+        data_payload = (form.f_name.data,
+                        form.l_name.data,
+                        form.email.data,
+                        form.dob.data,
+                        form.vaccine.data,
+                        form.dose1.data,
+                        form.dose2.data)
 
-@app.route('/new_user', methods=["GET","POST"])
-def new_user():
-    if request.method == 'POST':
-        print(request.form.get('name'))
-        print(request.form.get('dob'))
-        print(request.form.get('vaccine'))
-        print(request.form.get('dose1'))
-        print(request.form.get('dose2'))
-    return render_template('new_user_form.html')
+        global camera
+        for i in range(15):
+            ret, frame = camera.read()
+            frame = resize_image(frame)
+            cv2.imwrite(os.path.join(dataset_path , form.f_name.data + '-' + form.l_name.data + str(i) + '.jpg'), frame)
+            time.sleep(0.2)
 
-# ''' @param
+        # Encode Faces
+        imagePaths = list(paths.list_images(dataset_path))
+        knownEncodings = []
+        knownNames = []
 
-#     - Dataset directory
-#     - serialized facial embeddings path
-#     - face detection model to use
-# '''
+        for imagePath in imagePaths:
+            print(imagePath)
+            image = cv2.imread(imagePath)
+            rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            boxes = face_recognition.face_locations(rgb,model='cnn')
+            print('Encoding ...')
+            encodings = face_recognition.face_encodings(rgb, boxes)
 
-# # Encode Faces
-# imagePaths = list(paths.list_images(dataset_path))
-# knownEncodings = []
-# knownNames = []
+            for encoding in encodings:
+                knownEncodings.append(encoding)
+                name = os.path.basename(imagePath).split('-')
+                knownNames.append(name[0])
 
-# for imagePath in imagePaths:
-#     print(imagePath)
-#     image = cv2.imread(imagePath)
-#     rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-#     boxes = face_recognition.face_locations(rgb,model='cnn')
-#     print('Encoding ...')
-#     encodings = face_recognition.face_encodings(rgb, boxes)
+        data = {"encodings": knownEncodings, "names": knownNames}
+        print(data)
+        f = open('model.pickle', "wb")
+        f.write(pickle.dumps(data))
+        f.close()
 
-#     for encoding in encodings:
-#         knownEncodings.append(encoding)
-#         knownNames.append(user)
+        print(data_payload)
 
-# # pickle dump the facial encodings and names to disk
-# data = {"encodings": knownEncodings, "names": knownNames}
-# f = open(model_path, "wb")
-# f.write(pickle.dumps(data))
-# f.close()
+        # user_data = pickle.dumps(data_payload)
+        # s.send(user_data)
+        return render_template('captured.html')
+    return render_template('generate.html', form=form)
+
+@app.route('/get_passport', methods=['GET', 'POST'])
+def get_passport():
+    return('Get Passport')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=2204, threaded=True)
