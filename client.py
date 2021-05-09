@@ -97,7 +97,6 @@ def generate():
             cv2.imwrite(os.path.join(dataset_path , form.f_name.data + '-' + form.l_name.data + '-' + str(i) + '.jpg'), frame)
             time.sleep(0.2)
 
-
         # Encode Faces
         imagePaths = list(paths.list_images(dataset_path))
         knownEncodings = []
@@ -166,21 +165,22 @@ def get_passport():
         s.send(data_pickled)
         print('Data Sent to Server')
 
-        '''
+        u_data = s.recv(size)
+        user_data = pickle.loads(u_data)
+        print(user_data)
 
-        Send mongo request with F name, last name and pin
+        user_details = {
+        'f_name': user_data[0],
+        'l_name': user_data[1],
+        'email' : user_data[2],
+        'dob' : user_data[3],
+        'vaccine' : user_data[4],
+        'dose1' : user_data[5],
+        'dose2' : user_data[6]}
 
-        get data back and render passport template
-        
-        '''
-
-        print(data_payload)
-        return("HELLO WORLD")
-
-
+        return render_template('display_passport.html', data=user_details)
 
     return render_template('get_images.html', form=form)
-
 
 
 if __name__ == '__main__':

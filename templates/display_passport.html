@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>test</title>
+    </head>
+    <body>
+        <body style="background-color:#55d3e6;"></body>
+        <center>
+        <h1>YOUR COVID-19 VACCINE PASSPORT</h1>
+        <img src ="/static/kid.png" alt = "Logo" width = "200">
+        <p style="font-size:30px"><strong>First Name</strong> &emsp; {{data.f_name}}</p>
+        <p style="font-size:30px"><strong>Last Name</strong> &emsp; {{data.l_name}}</p>
+        <p style="font-size:30px"><strong>Email</strong> &emsp; {{data.email}}</p>
+        <p style="font-size:30px"><strong>Date of Birth</strong> &emsp; {{data.dob}}</p>
+        <p style="font-size:30px"><strong>Vaccine</strong> &emsp; {{data.vaccine}}</p>
+        <p style="font-size:30px"><strong>Dose 1</strong> &emsp; {{data.dose1}}</p>
+        <p style="font-size:30px"><strong>Dose 2</strong> &emsp; {{data.dose2}}</p>
+        <form method="post" action="/">
+
+            <input type="submit" value="GO BACK" name="GO BACK" width="400px"/>
+        </form>
+
+        <!-- <p>{{data.l_name}}</p>
+        <p>{{data.email}}</p>
+        <p>{{data.dob}}</p>
+        <p>{{data.vaccine}}</p>
+        <p>{{data.dose1}}</p>
+        <p>{{data.dose2}}</p> -->
+        </center>
+    </body>
+</html>
