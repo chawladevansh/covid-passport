@@ -5,16 +5,29 @@
   <body>
     <body style="background-color:#55d3e6;"></body>
     <center>
-        <h1>COVID-19 VACCINE PASSPORT</h1>
-        <h2>GENERATE PASSPORT</h2>
+        <img src ="/static/logo.png" alt = "Logo" width = "200">
+        <br><br>
+        <h1>GENERATE PASSPORT</h1>
         <br><br><br>
         <img src="{{ url_for('video_feed') }}" width="400" border="3">
         <br><br><br>
-        <form method="post" action="/capture">
-
-            <input type="submit" value="Capture" name="CAPTURE"/>
-
-    </form>
+        <form method="POST" action="">
+          <div class="form-row">
+              <div class="form-group col-md-6">
+                  {{ form.csrf_token() }}
+                  <br>
+                  <br>
+                  <label for=""> {{ form.pin.label }}</label>
+                  <br>
+                  {{ form.pin }}
+                  <br>
+                  <br>
+              </div>
+              <div class="form-group">
+                  {{ form.submit(class="btn btn-primary")}}
+              </div>
+          </div>
+      </form>
     </center>
   </body>
 </head>
