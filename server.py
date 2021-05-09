@@ -10,6 +10,8 @@ host = ''
 port = 5000
 size = 128000
 
+db  =  pymongo.MongoClient().covid_passport
+
 def updateDatabase(db, f_name, l_name, email, dob, vaccine, dose1, dose2, pin):
     stats = {
         "FirstName": f_name,
@@ -24,8 +26,16 @@ def updateDatabase(db, f_name, l_name, email, dob, vaccine, dose1, dose2, pin):
     }
     db.utilization.insert_one(stats)
 
-# db  =  pymongo.MongoClient().TEST
-# updateDatabase(db, f_name, l_name, email, dob, vaccine, dose1, dose2, pin)
+def insertToDB(f_name, l_name, email, dob, vaccine, dose1, dose2, pin):
+    global db
+    updateDatabase(db, f_name, l_name, email, dob, vaccine, dose1, dose2, pin)
+    print('Record Created')
+
+def getFromFB(f_name, l_name, pin):
+    global db
+    utilization = db["utilization"]
+    for x in utilization.find({"FirstName": f_name, "LastName":l_name, "PIN":pin}, {"MsgID":0}):
+        print(x)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((host,port))
@@ -39,8 +49,13 @@ while True:
     data_unpickled = pickle.loads(data)
 
     if(data_unpickled["data"][0] == 0):
+        getFromFB(data_unpickled["data"][1], data_unpickled["data"][2], data_unpickled["data"][3])
         print('Get from DB')
     elif(data_unpickled["data"][0] == 1):
+        insertToDB(data_unpickled["data"][1], data_unpickled["data"][2], 
+                   data_unpickled["data"][3], data_unpickled["data"][4], 
+                   data_unpickled["data"][5], data_unpickled["data"][6], 
+                   data_unpickled["data"][7], data_unpickled["data"][8])
         print('Add to DB')
 
 client.close()

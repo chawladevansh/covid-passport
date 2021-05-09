@@ -1,6 +1,7 @@
 import os
 import cv2
 import pickle
+import re
 import time
 import glob
 import socket
@@ -157,7 +158,8 @@ def get_passport():
                 name = max(counts, key=counts.get)
             names.append(name)
         
-        data_payload = (0, name, form.pin.data)
+        name = name.split()
+        data_payload = (0, name[0], name[1], form.pin.data)
 
         data_dict = {"data":data_payload}
         data_pickled = pickle.dumps(data_dict)
