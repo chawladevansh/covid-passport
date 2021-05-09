@@ -22,11 +22,11 @@ camera = cv2.VideoCapture(0)
 
 host = ''
 port = 5000
-size = 32000
+size = 128000
 
-# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# s.connect((host,port))
-# print('[Client 01] - Connecting to ', host, ' on port', port, end='\n\n')
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((host,port))
+print('[Client 01] - Connecting to ', host, ' on port', port, end='\n\n')
 
 dataset_path = '/home/devansh/covid-passport/Dataset'
 model_path = '/home/devansh/covid-passport/model.pickle'
@@ -78,7 +78,9 @@ def generate():
     # TODO : get user pin
 
     if form.validate_on_submit():
-        data_payload = (form.f_name.data,
+        flag = 1
+        data_payload = (flag,
+                        form.f_name.data,
                         form.l_name.data,
                         form.email.data,
                         form.dob.data,
@@ -91,7 +93,7 @@ def generate():
         for i in range(15):
             ret, frame = camera.read()
             frame = resize_image(frame)
-            cv2.imwrite(os.path.join(dataset_path , form.f_name.data + '-' + form.l_name.data + '-' + form.p + str(i) + '.jpg'), frame)
+            cv2.imwrite(os.path.join(dataset_path , form.f_name.data + '-' + form.l_name.data + '-' + str(i) + '.jpg'), frame)
             time.sleep(0.2)
 
 
@@ -111,18 +113,16 @@ def generate():
             for encoding in encodings:
                 knownEncodings.append(encoding)
                 name = os.path.basename(imagePath).split('-')
-                knownNames.append(name[0])
+                knownNames.append(name[0] + ' ' + name[1])
 
         data = {"encodings": knownEncodings, "names": knownNames, "data" : data_payload}
 
-        # data_pickled = pickle.dumps(data)
-        # s.send(data_pickled)
-        # print(getsizeof(data_pickled))
+        data_pickled = pickle.dumps(data)
+        s.send(data_pickled)
         print('Data Sent to Server')
         f = open('model.pickle', "wb")
-        f.write(pickle.dumps(data))
+        f.write(data_pickled)
         f.close() 
-
 
         return render_template('captured.html')
     return render_template('generate.html', form=form)
@@ -137,7 +137,6 @@ def get_passport():
         ret, frame = camera.read()
         frame = resize_image(frame)
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        camera.release()
         print('Image captured')
         print('This might take a while..')
 
@@ -158,8 +157,25 @@ def get_passport():
                 name = max(counts, key=counts.get)
             names.append(name)
         
-        print(name)
+        data_payload = (0, name, form.pin.data)
+
+        data_dict = {"data":data_payload}
+        data_pickled = pickle.dumps(data_dict)
+        s.send(data_pickled)
+        print('Data Sent to Server')
+
+        '''
+
+        Send mongo request with F name, last name and pin
+
+        get data back and render passport template
+        
+        '''
+
+        print(data_payload)
         return("HELLO WORLD")
+
+
 
     return render_template('get_images.html', form=form)
 
