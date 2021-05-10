@@ -17,14 +17,19 @@ from imutils import paths
 from wtforms import StringField, TextField, SubmitField
 from wtforms.validators import DataRequired, Length
 
+# Create flask app
 app = Flask(__name__)
 app.config['SECRET_KEY']='DevanshAndJayTeam16'
+
+# Camera video capture object
 camera = cv2.VideoCapture(0)
 
+# Define host, port and buffer size
 host = ''
 port = 5000
 size = 128000
 
+# Establish socket connection to server
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((host,port))
 print('[Client 01] - Connecting to ', host, ' on port', port, end='\n\n')
@@ -32,11 +37,13 @@ print('[Client 01] - Connecting to ', host, ' on port', port, end='\n\n')
 dataset_path = '/home/devansh/covid-passport/Dataset'
 model_path = '/home/devansh/covid-passport/model.pickle'
 
+# Resize image to 1/3 dimensions
 def resize_image(image):
     dim = (int(image.shape[1]/3), int(image.shape[0]/3))
     resized = cv2.resize(image, dim)
     return resized
 
+# User data form class
 class get_user_data(FlaskForm):
     f_name = StringField(label=('First Name'))
     l_name = StringField('Last Name')
@@ -48,14 +55,17 @@ class get_user_data(FlaskForm):
     pin = StringField('6 Digit Pin')
     submit = SubmitField('Submit')
 
+# User password form
 class get_user_pass(FlaskForm):
     pin = StringField('Pin')
     submit = SubmitField('Submit')
 
+# Root route
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
 
+# Background video feed route
 @app.route('/video_feed', methods=['GET', 'POST'])
 def video_feed():
     global camera
@@ -72,6 +82,7 @@ def get_video(camera):
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
+# Generate passport route
 @app.route('/generate', methods=['GET', 'POST'])
 def generate():
     form = get_user_data()
@@ -117,6 +128,7 @@ def generate():
 
         data = {"encodings": knownEncodings, "names": knownNames, "data" : data_payload}
 
+        # Send pickled data to server
         data_pickled = pickle.dumps(data)
         s.send(data_pickled)
         print('Data Sent to Server')
@@ -127,6 +139,7 @@ def generate():
         return render_template('captured.html')
     return render_template('generate.html', form=form)
 
+# Get passport route
 @app.route('/get_passport', methods=['GET', 'POST'])
 def get_passport():
     form = get_user_pass()
@@ -183,5 +196,6 @@ def get_passport():
     return render_template('get_images.html', form=form)
 
 
+# Main entry point for app
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=2204, threaded=True)
